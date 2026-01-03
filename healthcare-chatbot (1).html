@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare Connect - Book Your Appointment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #4285f4;
+            --success-green: #34a853;
+            --accent-red: #ea4335;
+            --light-bg: #f8f9fa;
+            --dark-text: #202124;
+            --gray-text: #5f6368;
+            --border-color: #dadce0;
+            --white: #ffffff;
+            --shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+            --shadow-lg: 0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark-text);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            max-height: 700px;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-header {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-avatar {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header-info h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: var(--white);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--light-bg);
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--primary-blue), #5a99f7);
+            color: var(--white);
+            margin-right: 12px;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--success-green), #5cbd6e);
+            color: var(--white);
+            margin-left: 12px;
+        }
+
+        .message-content {
+            max-width: 65%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .message.bot .message-bubble {
+            background: var(--white);
+            color: var(--dark-text);
+            box-shadow: var(--shadow);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background: var(--primary-blue);
+            color: var(--white);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--gray-text);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-reply-btn {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            color: var(--primary-blue);
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .quick-reply-btn:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-reply-btn i {
+            margin-right: 6px;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .selection-card {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .selection-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .selection-card.selected {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(66, 133, 244, 0.05));
+        }
+
+        .selection-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark-text);
+        }
+
+        .selection-card p {
+            font-size: 12px;
+            color: var(--gray-text);
+        }
+
+        .selection-card .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--primary-blue);
+        }
+
+        .date-picker, .time-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .date-btn, .time-btn {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .date-btn:hover, .time-btn:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-1px);
+        }
+
+        .date-btn.selected, .time-btn.selected {
+            background: var(--primary-blue);
+            color: var(--white);
+            border-color: var(--primary-blue);
+        }
+
+        .date-btn.disabled, .time-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .date-btn .day {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .date-btn .date {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 4px 0;
+        }
+
+        .chat-form {
+            background: var(--white);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dark-text);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .form-submit {
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .form-submit:hover {
+            background: #3367d6;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--gray-text);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--success-green), #5cbd6e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            color: var(--white);
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-header p {
+            color: var(--gray-text);
+            font-size: 14px;
+        }
+
+        .appointment-details {
+            background: var(--light-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: var(--gray-text);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: var(--dark-text);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .modal-btn.primary:hover {
+            background: #3367d6;
+            transform: translateY(-1px);
+        }
+
+        .modal-btn.secondary {
+            background: var(--light-bg);
+            color: var(--dark-text);
+        }
+
+        .modal-btn.secondary:hover {
+            background: #e8eaed;
+        }
+
+        .appointment-list {
+            margin-top: 12px;
+        }
+
+        .appointment-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .appointment-card h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+        }
+
+        .appointment-card p {
+            font-size: 13px;
+            color: var(--gray-text);
+            margin-bottom: 4px;
+        }
+
+        .appointment-card .cancel-btn {
+            margin-top: 12px;
+            background: var(--accent-red);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .appointment-card .cancel-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 80%;
+            }
+
+            .selection-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-info h1 {
+                font-size: 18px;
+            }
+
+            .header-info p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-avatar">
+                <i class="fas fa-hospital"></i>
+            </div>
+            <div class="header-info">
+                <h1>HealthCare Connect</h1>
+                <p>Your trusted healthcare assistant</p>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="showInfo()">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2>Appointment Confirmed!</h2>
+                <p>Your appointment has been successfully booked</p>
+            </div>
+            <div class="appointment-details" id="modalDetails"></div>
+            <div class="modal-actions">
+                <button class="modal-btn primary" onclick="closeModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const doctors = [
+            {
+                id: 1,
+                name: 'Dr. Sarah Johnson',
+                specialty: 'Cardiology',
+                icon: 'fa-heartbeat',
+                availability: [1, 2, 3, 5]
+            },
+            {
+                id: 2,
+                name: 'Dr. Michael Chen',
+                specialty: 'Orthopedics',
+                icon: 'fa-bone',
+                availability: [0, 1, 3, 4, 6]
+            },
+            {
+                id: 3,
+                name: 'Dr. Emily Rodriguez',
+                specialty: 'Pediatrics',
+                icon: 'fa-baby',
+                availability: [0, 2, 4, 5]
+            },
+            {
+                id: 4,
+                name: 'Dr. James Williams',
+                specialty: 'Dermatology',
+                icon: 'fa-hand-holding-medical',
+                availability: [1, 2, 3, 4, 6]
+            },
+            {
+                id: 5,
+                name: 'Dr. Lisa Anderson',
+                specialty: 'General Medicine',
+                icon: 'fa-stethoscope',
+                availability: [0, 1, 2, 3, 4, 5, 6]
+            }
+        ];
+
+        const timeSlots = [
+            '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+            '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+            '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM'
+        ];
+
+        let chatState = {
+            step: 'welcome',
+            selectedDoctor: null,
+            selectedDate: null,
+            selectedTime: null,
+            patientInfo: {}
+        };
+
+        let appointments = [];
+
+        function init() {
+            addBotMessage(
+                "Hello! 👋 Welcome to HealthCare Connect. I'm here to help you book an appointment with one of our specialists.",
+                ['book-appointment', 'view-appointments', 'hospital-info']
+            );
+        }
+
+        function addBotMessage(text, quickReplies = null) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            let content = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-bubble">${text}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+            `;
+
+            if (quickReplies) {
+                content += '<div class="quick-replies">';
+                quickReplies.forEach(reply => {
+                    const replyConfig = getQuickReplyConfig(reply);
+                    content += `<button class="quick-reply-btn" onclick="handleQuickReply('${reply}')">
+                        <i class="${replyConfig.icon}"></i> ${replyConfig.text}
+                    </button>`;
+                });
+                content += '</div>';
+            }
+
+            content += '</div>';
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addUserMessage(text) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-bubble">${text}</div>
+                    <div class="message-time">${getCurrentTime()}</div>
+                </div>
+                <div class="message-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const typingDiv = document.getElementById('typingIndicator');
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function getQuickReplyConfig(type) {
+            const configs = {
+                'book-appointment': { text: 'Book Appointment', icon: 'fas fa-calendar-plus' },
+                'view-appointments': { text: 'View Appointments', icon: 'fas fa-list' },
+                'hospital-info': { text: 'Hospital Info', icon: 'fas fa-hospital' },
+                'cancel-appointment': { text: 'Cancel Appointment', icon: 'fas fa-times-circle' },
+                'back-to-menu': { text: 'Back to Menu', icon: 'fas fa-home' }
+            };
+            return configs[type] || { text: type, icon: 'fas fa-circle' };
+        }
+
+        function handleQuickReply(type) {
+            const config = getQuickReplyConfig(type);
+            addUserMessage(config.text);
+            
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    
+                    switch(type) {
+                        case 'book-appointment':
+                            startBookingFlow();
+                            break;
+                        case 'view-appointments':
+                            showAppointments();
+                            break;
+                        case 'hospital-info':
+                            showHospitalInfo();
+                            break;
+                        case 'cancel-appointment':
+                            cancelAppointmentFlow();
+                            break;
+                        case 'back-to-menu':
+                            resetChat();
+                            break;
+                    }
+                }, 800);
+            }, 300);
+        }
+
+        function startBookingFlow() {
+            chatState.step = 'select-doctor';
+            addBotMessage("Great! Let's book your appointment. Please select a doctor from our specialists:");
+            showDoctorSelection();
+        }
+
+        function showDoctorSelection() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            let content = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="selection-grid">
+            `;
+
+            doctors.forEach(doctor => {
+                content += `
+                    <div class="selection-card" onclick="selectDoctor(${doctor.id})">
+                        <div class="icon"><i class="fas ${doctor.icon}"></i></div>
+                        <h4>${doctor.name}</h4>
+                        <p>${doctor.specialty}</p>
+                    </div>
+                `;
+            });
+
+            content += '</div></div>';
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function selectDoctor(doctorId) {
+            const doctor = doctors.find(d => d.id === doctorId);
+            chatState.selectedDoctor = doctor;
+            addUserMessage(`${doctor.name} - ${doctor.specialty}`);
+            
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    chatState.step = 'select-date';
+                    addBotMessage(`Excellent choice! ${doctor.name} is available on the following dates. Please select a date:`);
+                    showDateSelection();
+                }, 800);
+            }, 300);
+        }
+
+        function showDateSelection() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            let content = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="date-picker">
+            `;
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() + i);
+                const isAvailable = chatState.selectedDoctor.availability.includes(i);
+                const disabled = !isAvailable ? 'disabled' : '';
+                
+                content += `
+                    <div class="date-btn ${disabled}" onclick="${isAvailable ? `selectDate('${date.toISOString()}')` : ''}">
+                        <div class="day">${getDayName(date)}</div>
+                        <div class="date">${date.getDate()}</div>
+                        <div class="day">${getMonthName(date)}</div>
+                    </div>
+                `;
+            }
+
+            content += '</div></div>';
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function selectDate(dateString) {
+            const date = new Date(dateString);
+            chatState.selectedDate = date;
+            addUserMessage(formatDate(date));
+            
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    chatState.step = 'select-time';
+                    addBotMessage("Perfect! Now please select a time slot:");
+                    showTimeSelection();
+                }, 800);
+            }, 300);
+        }
+
+        function showTimeSelection() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            let content = `
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="time-picker">
+            `;
+
+            timeSlots.forEach(time => {
+                content += `
+                    <div class="time-btn" onclick="selectTime('${time}')">
+                        ${time}
+                    </div>
+                `;
+            });
+
+            content += '</div>

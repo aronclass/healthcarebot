@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare Appointment Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message-animation {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+        
+        /* Custom scrollbar for a more polished look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #94a3b8; /* slate-400 */
+            border-radius: 10px;
+            border: 3px solid transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #64748b; /* slate-500 */
+        }
+
+        /* Animated background */
+        body {
+            background: linear-gradient(-45deg, #e0f2f1, #e8eaf6, #e1f5fe, #fce4ec);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: 'hsl(195, 85%, 40%)', // Muted, professional teal/blue
+                            light: 'hsl(195, 70%, 92%)',
+                            dark: 'hsl(195, 85%, 30%)',
+                        },
+                        secondary: 'hsl(220, 10%, 96%)', // Very light gray
+                        accent: 'hsl(340, 82%, 52%)',   // For warnings/cancellations
+                        content: {
+                            dark: 'hsl(215, 28%, 17%)',
+                            medium: 'hsl(217, 19%, 35%)',
+                            light: 'hsl(215, 20%, 65%)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Roboto', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft-xl': '0 20px 50px -12px rgba(0, 0, 0, 0.1), 0 8px 20px -8px rgba(0, 0, 0, 0.08)',
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased font-sans flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+    <div id="chat-container" class="flex flex-col w-full max-w-lg h-[95vh] sm:h-[90vh] max-h-[800px] bg-white/70 backdrop-blur-xl rounded-none sm:rounded-4xl shadow-soft-xl overflow-hidden border border-white/50">
+        
+        <header class="bg-primary text-white p-4 text-center font-display font-semibold text-xl tracking-wide shadow-md z-10">
+            <h1 class="drop-shadow-sm">Appointment Assistant</h1>
+        </header>
+
+        <main id="chat-messages" class="flex-grow p-4 md:p-6 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
+            <!-- Messages will be dynamically inserted here -->
+        </main>
+        
+        <footer id="chat-input-area" class="p-3 md:p-4 border-t border-slate-200 bg-white/50 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <input type="text" id="user-input" placeholder="Type your message..." class="flex-grow w-full px-4 py-3 bg-slate-100 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-transparent transition-all duration-300">
+                <button id="send-btn" class="bg-primary hover:bg-primary-dark text-white rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 transition-transform duration-200 ease-in-out hover:scale-110 active:scale-100 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+
+            let currentState = 'idle';
+            let bookingData = {};
+
+            // --- SAMPLE DATA ---
+            const doctors = [
+                { id: 1, name: 'Dr. Evelyn Reed', specialization: 'Cardiology' },
+                { id: 2, name: 'Dr. Ben Carter', specialization: 'Dermatology' },
+                { id: 3, name: 'Dr. Olivia Chen', specialization: 'Pediatrics' },
+            ];
+
+            const doctorAvailability = {
+                1: { '2024-08-15': ['09:00 AM', '11:30 AM', '02:00 PM'], '2024-08-16': ['10:00 AM'] },
+                2: { '2024-08-15': ['10:30 AM', '03:00 PM'], '2024-08-17': ['09:30 AM', '11:00 AM', '04:00 PM'] },
+                3: { '2024-08-16': ['08:30 AM', '09:30 AM', '01:30 PM'], '2024-08-18': ['10:00 AM', '02:30 PM'] },
+            };
+            
+            let appointments = [
+                { id: 101, doctorId: 1, doctorName: 'Dr. Evelyn Reed', date: '2024-08-12', time: '10:00 AM', patientName: 'John Doe', contact: '555-1234' },
+            ];
+
+            // --- CORE CHAT FUNCTIONS ---
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function addMessage(text, sender, options = []) {
+                const messageContainer = document.createElement('div');
+                messageContainer.className = `w-full flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+
+                const messageBubble = document.createElement('div');
+                messageBubble.className = 'chat-message-animation max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl';
+
+                if (sender === 'user') {
+                    messageBubble.classList.add('bg-white', 'text-content-medium', 'rounded-br-lg', 'border', 'border-slate-200', 'shadow-sm');
+                } else {
+                    messageBubble.classList.add('bg-primary-light', 'text-content-dark', 'rounded-bl-lg');
+                }
+                messageBubble.innerHTML = text.replace(/\n/g, '<br>');
+                messageContainer.appendChild(messageBubble);
+                chatMessages.appendChild(messageContainer);
+
+                if (options.length > 0) {
+                    const optionsContainer = document.createElement('div');
+                    optionsContainer.className = 'chat-message-animation flex flex-wrap gap-2 mt-3 justify-start';
+                    options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option.label;
+                        button.className = 'px-4 py-2 bg-white border border-primary text-primary rounded-full text-sm font-medium hover:bg-primary-light transition-all duration-200 ease-in-out';
+                        button.onclick = () => handleOptionClick(option.value);
+                        optionsContainer.appendChild(button);
+                    });
+                    chatMessages.appendChild(optionsContainer);
+                }
+                
+                scrollToBottom();
+            }
+
+            function handleOptionClick(value) {
+                userInput.value = value;
+                processUserInput();
+            }
+
+            function sendBotMessage(text, options = []) {
+                setTimeout(() => addMessage(text, 'bot', options), 400);
+            }
+            
+            function sendUserMessage(text) {
+                addMessage(text, 'user');
+            }
+            
+            function resetChat() {
+                currentState = 'idle';
+                bookingData = {};
+                sendBotMessage("Welcome to the HealthCare Appointment Assistant! How can I help you today?", [
+                    { label: 'Book Appointment', value: 'Book an appointment' },
+                    { label: 'View Appointments', value: 'View my appointments' },
+                    { label: 'Cancel Appointment', value: 'Cancel an appointment' },
+                    { label: 'Contact Info', value: 'Hospital contact information' }
+                ]);
+            }
+            
+            // --- STATE HANDLERS & LOGIC ---
+            function processUserInput() {
+                const message = userInput.value.trim();
+                if (!message) return;
+                
+                sendUserMessage(message);
+                userInput.value = '';
+
+                switch (currentState) {
+                    case 'idle':
+                        handleIdleState(message);
+                        break;
+                    case 'booking_doctor_selection':
+                        handleDoctorSelection(message);
+                        break;
+                    case 'booking_date_selection':
+                        handleDateSelection(message);
+                        break;
+                    case 'booking_time_selection':
+                        handleTimeSelection(message);
+                        break;
+                    case 'booking_patient_name':
+                        handlePatientName(message);
+                        break;
+                    case 'booking_patient_contact':
+                        handlePatientContact(message);
+                        break;
+                    case 'cancelling_appointment':
+                        handleCancelAppointment(message);
+                        break;
+                    default:
+                        sendBotMessage("I'm not sure how to handle that. Let's start over.");
+                        resetChat();
+                }
+            }
+
+            function handleIdleState(message) {
+                const msgLower = message.toLowerCase();
+                if (msgLower.includes('book')) {
+                    startBookingAppointment();
+                } else if (msgLower.includes('view')) {
+                    viewAppointments();
+                } else if (msgLower.includes('cancel')) {
+                    startCancelAppointment();
+                } else if (msgLower.includes('contact')) {
+                    displayHospitalContact();
+                } else {
+                    sendBotMessage("I'm sorry, I didn't understand that. You can choose from the options below.", [
+                        { label: 'Book Appointment', value: 'Book an appointment' },
+                        { label: 'View Appointments', value: 'View my appointments' },
+                        { label: 'Cancel Appointment', value: 'Cancel an appointment' },
+                        { label: 'Contact Info', value: 'Hospital contact information' }
+                    ]);
+                }
+            }
+
+            function startBookingAppointment() {
+                currentState = 'booking_doctor_selection';
+                let doctorOptions = doctors.map(d => ({ label: `${d.name} (${d.specialization})`, value: d.name }));
+                sendBotMessage("Great! Please choose a doctor from the list below.", doctorOptions);
+            }
+            
+            function handleDoctorSelection(message) {
+                const selectedDoctor = doctors.find(d => message.toLowerCase().includes(d.name.toLowerCase()));
+                if (!selectedDoctor) {
+                    sendBotMessage("I couldn't find that doctor. Please select from the available options.");
+                    startBookingAppointment();
+                    return;
+                }
+                bookingData.doctorId = selectedDoctor.id;
+                bookingData.doctorName = selectedDoctor.name;
+
+                const availableDates = Object.keys(doctorAvailability[selectedDoctor.id] || {});
+                if (availableDates.length === 0) {
+                    sendBotMessage(`I'm sorry, ${selectedDoctor.name} has no available appointments. Please choose another doctor.`);
+                    startBookingAppointment();
+                    return;
+                }
+                currentState = 'booking_date_selection';
+                let dateOptions = availableDates.map(date => ({ label: date, value: date }));
+                sendBotMessage(`You've selected ${selectedDoctor.name}. Please choose an available date.`, dateOptions);
+            }
+            
+            function handleDateSelection(message) {
+                const availableDates = Object.keys(doctorAvailability[bookingData.doctorId] || {});
+                if (!availableDates.includes(message)) {
+                    sendBotMessage("That is not a valid date. Please choose from the options provided.");
+                    return;
+                }
+                bookingData.date = message;
+                currentState = 'booking_time_selection';
+                const availableTimes = doctorAvailability[bookingData.doctorId][message];
+                let timeOptions = availableTimes.map(time => ({ label: time, value: time }));
+                sendBotMessage(`Perfect. Now, please select an available time slot for ${message}.`, timeOptions);
+            }
+
+            function handleTimeSelection(message) {
+                const availableTimes = doctorAvailability[bookingData.doctorId][bookingData.date];
+                if (!availableTimes.includes(message)) {
+                    sendBotMessage("That time slot is not available. Please choose from the options provided.");
+                    return;
+                }
+                bookingData.time = message;
+                currentState = 'booking_patient_name';
+                sendBotMessage("Great! What is the full name of the patient?");
+            }
+
+            function handlePatientName(message) {
+                if (message.length < 3) {
+                    sendBotMessage("Please enter a valid full name.");
+                    return;
+                }
+                bookingData.patientName = message;
+                currentState = 'booking_patient_contact';
+                sendBotMessage("Thank you. And what is a good contact number?");
+            }
+
+            function handlePatientContact(message) {
+                // Simple validation for a phone number
+                if (!/^\d{3}-?\d{3}-?\d{4}$/.test(message.replace(/\s/g, ''))) {
+                   sendBotMessage("Please enter a valid phone number (e.g., 555-555-5555).");
+                   return;
+                }
+                bookingData.contact = message;
+
+                // Finalize booking
+                const newAppointment = {
+                    id: Math.max(0, ...appointments.map(a => a.id)) + 1,
+                    ...bookingData
+                };
+                appointments.push(newAppointment);
+
+                // Remove slot from availability
+                const times = doctorAvailability[bookingData.doctorId][bookingData.date];
+                const index = times.indexOf(bookingData.time);
+                if (index > -1) {
+                    times.splice(index, 1);
+                }
+
+                sendBotMessage(`✅ **Appointment Confirmed!**\n\n**Appointment ID:** ${newAppointment.id}\n**Doctor:** ${newAppointment.doctorName}\n**Date:** ${newAppointment.date}\n**Time:** ${newAppointment.time}\n**Patient:** ${newAppointment.patientName}\n\nWe'll see you then! Is there anything else I can help with?`);
+                
+                setTimeout(resetChat, 3000);
+            }
+
+            function viewAppointments() {
+                if (appointments.length === 0) {
+                    sendBotMessage("You have no upcoming appointments.");
+                } else {
+                    let appointmentList = "Here are your upcoming appointments:\n\n";
+                    appointments.forEach(app => {
+                        appointmentList += `**ID: ${app.id}** - Dr. ${app.doctorName}\nDate: ${app.date} at ${app.time}\nPatient: ${app.patientName}\n\n`;
+                    });
+                    sendBotMessage(appointmentList.trim());
+                }
+                setTimeout(() => sendBotMessage("How else can I help you?", [
+                    { label: 'Book another', value: 'Book an appointment' },
+                    { label: 'Cancel one', value: 'Cancel an appointment' }
+                ]), 1000);
+                currentState = 'idle';
+            }
+
+            function startCancelAppointment() {
+                if (appointments.length === 0) {
+                    sendBotMessage("There are no appointments to cancel.");
+                    currentState = 'idle';
+                    return;
+                }
+                currentState = 'cancelling_appointment';
+                let appointmentOptions = appointments.map(app => ({ label: `ID ${app.id} with ${app.doctorName}`, value: app.id.toString() }));
+                sendBotMessage("Which appointment would you like to cancel? Please select the appointment ID.", appointmentOptions);
+            }
+
+            function handleCancelAppointment(message) {
+                const appointmentId = parseInt(message, 10);
+                const appointmentIndex = appointments.findIndex(a => a.id === appointmentId);
+
+                if (appointmentIndex === -1) {
+                    sendBotMessage("I could not find an appointment with that ID. Please try again.");
+                    startCancelAppointment();
+                    return;
+                }
+
+                const cancelledApp = appointments.splice(appointmentIndex, 1)[0];
+
+                // Add slot back to availability
+                if (doctorAvailability[cancelledApp.doctorId] && doctorAvailability[cancelledApp.doctorId][cancelledApp.date]) {
+                     doctorAvailability[cancelledApp.doctorId][cancelledApp.date].push(cancelledApp.time);
+                     // Optional: sort times
+                     doctorAvailability[cancelledApp.doctorId][cancelledApp.date].sort();
+                }
+
+                sendBotMessage(`✅ Your appointment (ID: ${cancelledApp.id}) with ${cancelledApp.doctorName} on ${cancelledApp.date} has been successfully cancelled.`);
+                setTimeout(resetChat, 3000);
+            }
+            
+            function displayHospitalContact() {
+                sendBotMessage("**Hospital Contact Information**\n\n**Main Line:** (555) 123-4567\n**Emergency:** 911\n**Address:** 123 Health St, Wellness City, 45678");
+                currentState = 'idle';
+            }
+            
+            // --- EVENT LISTENERS ---
+            sendBtn.addEventListener('click', processUserInput);
+            userInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    processUserInput();
+                }
+            });
+
+            // --- INITIALIZATION ---
+            resetChat();
+        });
+    </script>
+
+</body>
+</html>

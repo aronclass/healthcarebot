@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthCare Connect | Smart Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --opal-blue: #e8f0fe;
+            --opal-green: #e6f4ea;
+            --google-blue: #1a73e8;
+            --google-green: #1e8e3e;
+            --vibrant-purple: #8ab4f8;
+            --vibrant-pink: #f28b82;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #3c4043;
+            overflow: hidden; /* Prevent body scroll, use container scroll */
+        }
+
+        .opal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .opal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease-out;
+            font-size: 0.9rem;
+        }
+
+        .bubble-bot { background-color: var(--opal-blue); color: #174ea6; border-bottom-left-radius: 4px; }
+        .bubble-user { background-color: var(--google-blue); color: white; border-bottom-right-radius: 4px; margin-left: auto; }
+
+        /* Navigation Visibility Fixes */
+        .hidden-section { display: none !important; }
+        .visible-section { display: flex !important; animation: fadeIn 0.4s ease; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .sidebar-item.active { color: var(--google-blue); }
+        .sidebar-item.active div { background-color: #e8f0fe; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; }
+
+        /* VIBRANT ELEMENTS */
+        .stat-ring { position: relative; width: 64px; height: 64px; }
+        .stat-ring svg { transform: rotate(-90deg); }
+        .stat-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+
+        .pill-tag {
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex h-screen w-screen overflow-hidden">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-20 md:w-24 bg-white border-r border-gray-100 flex flex-col items-center py-8 flex-shrink-0 z-50">
+        <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 mb-10 cursor-pointer" onclick="toggleView('dashboard')">
+            <i class="fas fa-hand-holding-medical text-xl"></i>
+        </div>
+        <div class="flex flex-col gap-8">
+            <button id="nav-dashboard" onclick="toggleView('dashboard')" class="sidebar-item active flex flex-col items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors">
+                <div class="p-3 rounded-2xl transition-all"><i class="fas fa-th-large text-lg"></i></div>
+                <span class="text-[10px] font-bold">Home</span>
+            </button>
+            <button id="nav-chat" onclick="startChat('general')" class="sidebar-item flex flex-col items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors">
+                <div class="p-3 rounded-2xl transition-all"><i class="fas fa-comment-dots text-lg"></i></div>
+                <span class="text-[10px] font-bold">Chat</span>
+            </button>
+            <button id="nav-agenda" onclick="toggleView('agenda')" class="sidebar-item flex flex-col items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors">
+                <div class="p-3 rounded-2xl transition-all"><i class="fas fa-calendar-alt text-lg"></i></div>
+                <span class="text-[10px] font-bold">Visits</span>
+            </button>
+            <button id="nav-payment" onclick="toggleView('payment')" class="sidebar-item flex flex-col items-center gap-1 text-gray-400 hover:text-blue-500 transition-colors">
+                <div class="p-3 rounded-2xl transition-all relative">
+                    <i class="fas fa-wallet text-lg"></i>
+                    <div id="payment-badge" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
+                </div>
+                <span class="text-[10px] font-bold">Wallet</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-grow flex flex-col h-full relative overflow-hidden bg-[#f8f9fa]">
+        <!-- Fixed Header -->
+        <header class="h-20 px-8 flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-gray-50 flex-shrink-0 z-40">
+            <div>
+                <h1 id="view-title" class="text-xl font-bold text-gray-800">Home</h1>
+                <p id="time-greeting" class="text-[11px] text-gray-500 font-medium">Good Morning, Alex!</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-gray-100"><i class="fas fa-bell"></i></button>
+                <div class="w-10 h-10 rounded-full bg-blue-100 overflow-hidden ring-2 ring-white">
+                    <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=1a73e8&color=fff" alt="Profile">
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Viewport -->
+        <div class="flex-grow overflow-y-auto custom-scrollbar p-6 md:p-8">
+            
+            <!-- DASHBOARD VIEW -->
+            <section id="dashboard-view" class="visible-section flex flex-col gap-8 max-w-6xl mx-auto pb-10">
+                <!-- Welcome Banner -->
+                <div class="opal-card p-8 md:p-10 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 text-white flex-shrink-0">
+                    <div class="flex-grow space-y-4 text-center md:text-left z-10">
+                        <div class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider">Health Score: 92%</div>
+                        <h2 class="text-3xl md:text-4xl font-bold">Feeling good today?</h2>
+                        <p class="text-blue-100 max-w-md text-sm leading-relaxed">You've completed 80% of your daily health goals. Your next appointment is in 2 days.</p>
+                        <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
+                            <button onclick="startChat('book')" class="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold shadow-lg hover:scale-105 transition-all">New Booking</button>
+                            <button id="dash-pay-btn" onclick="toggleView('payment')" class="bg-white/10 text-white px-6 py-3 rounded-xl font-bold border border-white/20 hover:bg-white/20 transition-all backdrop-blur-sm">View Wallet</button>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex w-36 h-36 bg-white/10 rounded-full items-center justify-center text-white text-5xl backdrop-blur-md border border-white/20 z-10">
+                        <i class="fas fa-heartbeat animate-pulse"></i>
+                    </div>
+                    <!-- Decorative patterns -->
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-blue-400/10 rounded-full blur-2xl"></div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="opal-card p-6 lg:col-span-2">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest">Activity Progress</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="stat-ring mb-2">
+                                    <svg width="64" height="64"><circle cx="32" cy="32" r="28" stroke="#f1f3f4"/><circle cx="32" cy="32" r="28" stroke="#1a73e8" stroke-dasharray="176" stroke-dashoffset="35"/></svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold">8.4k</div>
+                                </div>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Steps</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="stat-ring mb-2">
+                                    <svg width="64" height="64"><circle cx="32" cy="32" r="28" stroke="#f1f3f4"/><circle cx="32" cy="32" r="28" stroke="#34a853" stroke-dasharray="176" stroke-dashoffset="50"/></svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold">1.8L</div>
+                                </div>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Water</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="stat-ring mb-2">
+                                    <svg width="64" height="64"><circle cx="32" cy="32" r="28" stroke="#f1f3f4"/><circle cx="32" cy="32" r="28" stroke="#fbbc04" stroke-dasharray="176" stroke-dashoffset="60"/></svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold">7.2h</div>
+                                </div>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Sleep</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="stat-ring mb-2">
+                                    <svg width="64" height="64"><circle cx="32" cy="32" r="28" stroke="#f1f3f4"/><circle cx="32" cy="32" r="28" stroke="#ea4335" stroke-dasharray="176" stroke-dashoffset="90"/></svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-[11px] font-bold">520</div>
+                                </div>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase">Kcal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="opal-card p-6 border-l-4 border-amber-400">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Meds</h4>
+                            <span class="pill-tag bg-amber-100 text-amber-700">Next: 2 PM</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-500 shadow-sm"><i class="fas fa-pills text-xs"></i></div>
+                                <div class="flex-grow">
+                                    <p class="text-[11px] font-bold text-gray-800">Vitamin D3</p>
+                                    <p class="text-[9px] text-gray-400">1 Capsule • Daily</p>
+                                </div>
+                                <input type="checkbox" class="w-4 h-4 rounded text-blue-600 border-gray-300">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="opal-card p-6 bg-white border-l-4 border-blue-500 flex items-start gap-4">
+                        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h4 class="font-bold text-xs text-gray-400 uppercase mb-1">AI Assistant</h4>
+                            <p id="ai-health-tip" class="text-gray-700 text-sm italic font-medium leading-relaxed">"Your active recovery is looking good. Try to get 15 more minutes of movement today."</p>
+                        </div>
+                    </div>
+                    <div class="opal-card p-6 bg-white border-l-4 border-purple-500 flex items-start gap-4">
+                        <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 flex-shrink-0"><i class="fas fa-brain"></i></div>
+                        <div>
+                            <h4 class="font-bold text-xs text-gray-400 uppercase mb-1">Mindfulness</h4>
+                            <p class="text-gray-700 text-sm font-medium">Daily Focus: Guided 5-min meditation</p>
+                            <button class="mt-2 text-xs font-bold text-purple-600 hover:underline">Start Session →</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHAT VIEW -->
+            <section id="chat-view" class="hidden-section flex flex-col h-full max-w-3xl mx-auto">
+                <div id="chat-messages" class="flex-grow overflow-y-auto px-2 space-y-4 custom-scrollbar pb-10"></div>
+                
+                <!-- Floating Input Area -->
+                <div id="action-area" class="mt-auto bg-white rounded-2xl p-4 shadow-xl border border-gray-100 mb-2">
+                    <!-- Search Results (Merged gracefully inside the chat area) -->
+                    <div id="hospital-search-ui" class="hidden pb-4 space-y-2 border-b border-gray-50 mb-4">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase px-2">Select a Facility</p>
+                        <div id="hospital-results" class="max-h-48 overflow-y-auto space-y-2 no-scrollbar"></div>
+                    </div>
+                    <div id="doctor-search-ui" class="hidden pb-4 space-y-2 border-b border-gray-50 mb-4">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase px-2">Choose Doctor</p>
+                        <div id="doctor-results" class="max-h-48 overflow-y-auto space-y-2 no-scrollbar"></div>
+                    </div>
+                    
+                    <div id="quick-replies" class="flex gap-2 overflow-x-auto pb-4 no-scrollbar"></div>
+                    <div class="relative flex items-center">
+                        <input type="text" id="user-input" placeholder="Ask your health assistant..." class="w-full p-4 pr-16 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <button onclick="handleSend()" class="absolute right-2 w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-100 active:scale-95 transition-all"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AGENDA VIEW -->
+            <section id="agenda-view" class="hidden-section flex flex-col gap-6 w-full max-w-4xl mx-auto">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">Upcoming Visits</h2>
+                    <button onclick="startChat('book')" class="text-sm font-bold text-blue-600">+ Book New</button>
+                </div>
+                <div id="agenda-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="empty-agenda" class="flex flex-col items-center py-20 text-center opacity-50">
+                    <i class="fas fa-calendar-check text-5xl mb-4 text-gray-200"></i>
+                    <p class="font-bold text-gray-400">No appointments scheduled</p>
+                </div>
+            </section>
+
+            <!-- WALLET VIEW -->
+            <section id="payment-view" class="hidden-section flex flex-col items-center gap-6 w-full max-w-md mx-auto pt-4">
+                <div id="invoice-card" class="opal-card p-10 w-full space-y-8 bg-white">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mx-auto mb-4 shadow-sm"><i class="fas fa-receipt text-2xl"></i></div>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Outstanding</p>
+                        <h3 id="payment-amount" class="text-5xl font-bold text-gray-900 mt-2">$120.00</h3>
+                    </div>
+                    <div class="space-y-4 pt-6 border-t border-gray-50">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">Consultation Fee</p>
+                                <p class="text-[11px] text-gray-400">Dr. Sarah Jenkins • Jan 24</p>
+                            </div>
+                            <p class="font-bold text-gray-700 text-sm">$120.00</p>
+                        </div>
+                        <div id="payment-status-row" class="flex justify-between items-center py-2">
+                            <span id="payment-status-badge" class="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">PENDING</span>
+                        </div>
+                        <button id="pay-now-btn" onclick="processPayment()" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-xl shadow-emerald-50 hover:bg-emerald-700 transition-all">Pay Now</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- BOOKING MODAL -->
+    <div id="booking-form-overlay" class="fixed inset-0 bg-blue-900/10 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+        <div class="opal-card w-full max-w-md p-8 bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Confirm Booking</h2>
+                <button onclick="closeBooking()" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <p id="modal-doc-name" class="font-bold text-blue-800 text-sm"></p>
+                    <p id="modal-facility" class="text-[11px] text-blue-600 mt-1"></p>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1 block">Date</label>
+                    <input type="date" id="appt-date" class="w-full p-4 bg-gray-50 rounded-xl border-none text-sm focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2 mb-1 block">Time Slot</label>
+                    <select id="appt-time" class="w-full p-4 bg-gray-50 rounded-xl border-none text-sm focus:ring-2 focus:ring-blue-500">
+                        <option>09:00 AM</option><option>11:00 AM</option><option>02:00 PM</option><option>04:30 PM</option>
+                    </select>
+                </div>
+                <button onclick="finalizeBooking()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-100 mt-4 active:scale-95 transition-all">Confirm Appointment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hospitals = [
+            { id: 101, name: "City General Hospital", type: "Hospital", address: "Downtown Area" },
+            { id: 102, name: "St. Mary Medical Center", type: "Hospital", address: "Upper East" },
+            { id: 103, name: "Wellness Point Clinic", type: "Clinic", address: "Riverside" }
+        ];
+
+        const doctors = [
+            { id: 1, name: "Dr. Sarah Jenkins", specialty: "Cardiologist", facilityId: 101 },
+            { id: 2, name: "Dr. Marcus Thorne", specialty: "Neurologist", facilityId: 101 },
+            { id: 3, name: "Dr. Elena Rodriguez", specialty: "Pediatrician", facilityId: 102 }
+        ];
+
+        let appointments = [];
+        let currentState = { hospital: null, doctor: null, paid: false };
+
+        function toggleView(view) {
+            const views = ['dashboard', 'chat', 'agenda', 'payment'];
+            views.forEach(v => {
+                const el = document.getElementById(`${v}-view`);
+                const nav = document.getElementById(`nav-${v}`);
+                if (el && nav) {
+                    if (v === view) {
+                        el.classList.remove('hidden-section');
+                        el.classList.add('visible-section');
+                        nav.classList.add('active');
+                    } else {
+                        el.classList.add('hidden-section');
+                        el.classList.remove('active');
+                        nav.classList.remove('active');
+                    }
+                }
+            });
+            
+            if (view === 'agenda') renderAgenda();
+            if (view === 'payment') updatePaymentUI();
+            
+            const titleEl = document.getElementById('view-title');
+            titleEl.innerText = view.charAt(0).toUpperCase() + view.slice(1);
+        }
+
+        function updatePaymentUI() {
+            const badge = document.getElementById('payment-badge');
+            const statusBadge = document.getElementById('payment-status-badge');
+            const payBtn = document.getElementById('pay-now-btn');
+            const amountText = document.getElementById('payment-amount');
+            const dashPayBtn = document.getElementById('dash-pay-btn');
+
+            if (currentState.paid) {
+                if(badge) badge.classList.add('hidden');
+                statusBadge.innerText = 'PAID';
+                statusBadge.className = "px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full";
+                amountText.innerText = '$0.00';
+                amountText.classList.add('text-emerald-600');
+                payBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Payment Cleared';
+                payBtn.className = "w-full bg-gray-50 text-gray-400 py-4 rounded-xl font-bold cursor-not-allowed";
+                payBtn.disabled = true;
+                if(dashPayBtn) dashPayBtn.classList.add('hidden');
+            }
+        }
+
+        function processPayment() {
+            const payBtn = document.getElementById('pay-now-btn');
+            const originalText = payBtn.innerHTML;
+            payBtn.innerText = 'Verifying...';
+            setTimeout(() => {
+                currentState.paid = true;
+                updatePaymentUI();
+                addMessage("✅ Your payment of **$120.00** has been processed successfully!", 'bot');
+                toggleView('payment');
+            }, 1200);
+        }
+
+        function addMessage(text, sender = 'bot') {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `chat-bubble ${sender === 'bot' ? 'bubble-bot' : 'bubble-user'}`;
+            // Simple markdown replacement for bold
+            div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            container.appendChild(div);
+            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }
+
+        function startChat(mode) {
+            toggleView('chat');
+            document.getElementById('chat-messages').innerHTML = '';
+            document.getElementById('hospital-search-ui').classList.add('hidden');
+            document.getElementById('doctor-search-ui').classList.add('hidden');
+            
+            if (mode === 'book') {
+                addMessage("I can help you schedule an appointment. First, please choose a healthcare facility:");
+                showHospitalSearch();
+            } else {
+                addMessage("Hello Alex! I'm your health assistant. What's on your mind today?");
+                setSuggestions(["Book Appointment", "Latest Lab Results", "Pay Bills"]);
+            }
+        }
+
+        function setSuggestions(list) {
+            const container = document.getElementById('quick-replies');
+            container.innerHTML = list.map(label => `<button onclick="handleSuggestion('${label}')" class="whitespace-nowrap px-4 py-2 bg-blue-50 rounded-full text-[11px] font-bold text-blue-600 border border-blue-100 hover:bg-blue-100 transition-colors">${label}</button>`).join('');
+        }
+
+        function handleSuggestion(label) {
+            addMessage(label, 'user');
+            if (label.includes("Book")) startChat('book');
+            else if (label.includes("Pay")) toggleView('payment');
+            else {
+                setTimeout(() => addMessage("I'm fetching your latest reports. Just a moment...", 'bot'), 500);
+            }
+        }
+
+        function showHospitalSearch() {
+            document.getElementById('hospital-search-ui').classList.remove('hidden');
+            const results = document.getElementById('hospital-results');
+            results.innerHTML = '';
+            hospitals.forEach(h => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-gray-50 rounded-xl hover:bg-blue-50 cursor-pointer text-sm font-bold text-gray-700 transition-colors border border-transparent hover:border-blue-100";
+                div.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-hospital text-blue-400"></i> ${h.name}</div>`;
+                div.onclick = () => selectHospital(h);
+                results.appendChild(div);
+            });
+        }
+
+        function selectHospital(h) {
+            currentState.hospital = h;
+            addMessage(`Excellent Choice: **${h.name}**. Which specialist would you like to see?`);
+            document.getElementById('hospital-search-ui').classList.add('hidden');
+            document.getElementById('doctor-search-ui').classList.remove('hidden');
+            
+            const results = document.getElementById('doctor-results');
+            results.innerHTML = '';
+            doctors.filter(d => d.facilityId === h.id).forEach(d => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-gray-50 rounded-xl hover:bg-emerald-50 cursor-pointer flex justify-between items-center border border-transparent hover:border-emerald-100 transition-colors";
+                div.innerHTML = `<div class="flex items-center gap-3"><i class="fas fa-user-md text-emerald-400"></i> <div><p class="text-sm font-bold text-gray-700">${d.name}</p><p class="text-[10px] text-gray-400">${d.specialty}</p></div></div><i class="fas fa-chevron-right text-gray-300 text-xs"></i>`;
+                div.onclick = () => openBooking(d);
+                results.appendChild(div);
+            });
+        }
+
+        function openBooking(doc) {
+            currentState.doctor = doc;
+            document.getElementById('modal-doc-name').innerText = doc.name;
+            document.getElementById('modal-facility').innerText = currentState.hospital.name;
+            document.getElementById('booking-form-overlay').classList.remove('hidden');
+            document.getElementById('booking-form-overlay').classList.add('flex');
+        }
+
+        function closeBooking() {
+            document.getElementById('booking-form-overlay').classList.add('hidden');
+        }
+
+        function finalizeBooking() {
+            const dateInput = document.getElementById('appt-date');
+            const date = dateInput.value;
+            const time = document.getElementById('appt-time').value;
+            if (!date) {
+                dateInput.classList.add('ring-2', 'ring-red-300');
+                return;
+            }
+            dateInput.classList.remove('ring-2', 'ring-red-300');
+            
+            appointments.push({ id: Date.now(), doctor: currentState.doctor, hospital: currentState.hospital, date, time });
+            closeBooking();
+            addMessage(`Booking Confirmed! You're scheduled for **${date}** at **${time}** with **${currentState.doctor.name}**.`);
+            document.getElementById('doctor-search-ui').classList.add('hidden');
+            setTimeout(() => toggleView('agenda'), 1000);
+        }
+
+        function renderAgenda() {
+            const list = document.getElementById('agenda-list');
+            const empty = document.getElementById('empty-agenda');
+            list.innerHTML = '';
+            if (appointments.length === 0) { 
+                empty.classList.remove('hidden'); 
+                return; 
+            }
+            empty.classList.add('hidden');
+            appointments.forEach(app => {
+                const div = document.createElement('div');
+                div.className = "opal-card p-5 flex items-center justify-between border-l-4 border-blue-500";
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <p class="font-bold text-sm text-gray-800">${app.doctor.name}</p>
+                            <p class="text-[10px] text-gray-400">${app.date} • ${app.time}</p>
+                        </div>
+                    </div>
+                    <button onclick="cancelAppt(${app.id})" class="text-gray-300 hover:text-red-400 transition-colors p-2"><i class="fas fa-trash-alt"></i></button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function cancelAppt(id) {
+            appointments = appointments.filter(a => a.id !== id);
+            renderAgenda();
+        }
+
+        function handleSend() {
+            const input = document.getElementById('user-input');
+            const val = input.value.trim();
+            if(!val) return;
+            addMessage(val, 'user');
+            input.value = '';
+            setTimeout(() => addMessage("I've received your request. Let me check the database for you.", 'bot'), 800);
+        }
+
+        window.onload = () => {
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+            document.getElementById('time-greeting').innerText = `${greeting}, Alex!`;
+            
+            // Allow Enter key to send messages
+            document.getElementById('user-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') handleSend();
+            });
+
+            toggleView('dashboard');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Portal</title>
+    <!-- Google Fonts: Outfit for display, Inter for body -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap');
+    </style>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primaryBlue: '#2196F3', // Original primary blue
+                        accentGreen: '#4CAF50', // Original accent green
+                        darkBg: '#1a202c', // Dark charcoal/slate for background
+                        darkCard: 'rgba(30, 41, 59, 0.7)', // Slightly lighter, translucent for cards
+                        darkBorder: 'rgba(71, 85, 105, 0.5)', // Subtle border for glassmorphism
+                        darkText: '#e2e8f0', // Light text for dark background
+                        darkTextSecondary: '#94a3b8', // Lighter secondary text
+                        focusRing: '#60a5fa', // Blue ring on focus
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideInLeft: {
+                            '0%': { opacity: '0', transform: 'translateX(-20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        slideInRight: {
+                            '0%': { opacity: '0', transform: 'translateX(20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        }
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.5s ease-out forwards',
+                        slideInLeft: 'slideInLeft 0.5s ease-out forwards',
+                        slideInRight: 'slideInRight 0.5s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            @apply bg-gradient-to-br from-darkBg to-slate-950 font-body text-darkText min-h-screen flex flex-col justify-center items-center;
+            scroll-behavior: smooth; /* For smooth scrolling to sections */
+        }
+        .container {
+            @apply w-full max-w-4xl lg:max-w-5xl px-4 py-8 md:py-12;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2a3341;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .glass-card {
+            @apply bg-darkCard border border-darkBorder rounded-xl shadow-xl backdrop-filter backdrop-blur-lg;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <div class="container animate-fadeIn">
+        <!-- Header -->
+        <header class="text-center mb-12 animate-slideInLeft">
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-2 leading-tight">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-primaryBlue to-blue-300">
+                    Healthcare Portal
+                </span>
+            </h1>
+            <p class="text-darkTextSecondary text-lg sm:text-xl max-w-2xl mx-auto">
+                Your integrated gateway to health services and information.
+            </p>
+        </header>
+
+        <!-- Login Section -->
+        <section id="login-section" class="mb-16 animate-fadeIn">
+            <div class="glass-card p-6 md:p-8 max-w-lg mx-auto transform transition-all duration-300 hover:shadow-2xl">
+                <h2 class="font-display text-3xl font-bold text-darkText mb-6 text-center">Login</h2>
+
+                <!-- Login Type Toggle -->
+                <div class="flex bg-slate-800 rounded-full p-1 mb-6 max-w-sm mx-auto shadow-inner">
+                    <button id="patient-login-btn"
+                            class="flex-1 py-3 px-4 text-center text-sm font-semibold rounded-full transition-all duration-300 ease-in-out bg-gradient-to-r from-primaryBlue to-blue-500 text-white shadow-md">
+                        Patient Login
+                    </button>
+                    <button id="doctor-login-btn"
+                            class="flex-1 py-3 px-4 text-center text-sm font-semibold rounded-full transition-all duration-300 ease-in-out text-darkTextSecondary hover:bg-slate-700">
+                        Doctor Login
+                    </button>
+                </div>
+
+                <!-- Patient Login Form -->
+                <form id="patient-login-form" class="space-y-5 animate-fadeIn">
+                    <div>
+                        <label for="patient-email" class="block text-darkTextSecondary text-sm font-medium mb-2">Email or Username</label>
+                        <input type="text" id="patient-email" name="email" placeholder="john.doe@example.com"
+                               class="w-full p-3 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                      focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="patient-password" class="block text-darkTextSecondary text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="patient-password" name="password" placeholder="••••••••"
+                               class="w-full p-3 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                      focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                    </div>
+                    <button type="submit"
+                            class="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-primaryBlue to-blue-600
+                                   text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700
+                                   transition-all duration-300 transform hover:scale-105 active:scale-95">
+                        Login
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </button>
+                </form>
+
+                <!-- Doctor Login Form (hidden by default) -->
+                <form id="doctor-login-form" class="space-y-5 hidden animate-fadeIn">
+                    <div>
+                        <label for="doctor-email" class="block text-darkTextSecondary text-sm font-medium mb-2">Doctor ID or Email</label>
+                        <input type="text" id="doctor-email" name="email" placeholder="dr.smith@hospital.com"
+                               class="w-full p-3 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                      focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                    </div>
+                    <div>
+                        <label for="doctor-password" class="block text-darkTextSecondary text-sm font-medium mb-2">Password</label>
+                        <input type="password" id="doctor-password" name="password" placeholder="••••••••"
+                               class="w-full p-3 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                      focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                    </div>
+                    <button type="submit"
+                            class="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-primaryBlue to-blue-600
+                                   text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700
+                                   transition-all duration-300 transform hover:scale-105 active:scale-95">
+                        Login
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Hospital Search Section -->
+        <section id="hospital-search-section" class="mb-16 animate-fadeIn">
+            <h2 class="font-display text-3xl font-bold text-darkText mb-8 text-center animate-slideInRight">Find a Hospital</h2>
+
+            <div class="glass-card p-6 md:p-8 max-w-4xl mx-auto transform transition-all duration-300 hover:shadow-2xl">
+                <div class="relative mb-8">
+                    <input type="text" id="hospital-search-input" placeholder="Search Hospitals by name or address..."
+                           class="w-full p-4 pl-12 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                  focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                    <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-darkTextSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+
+                <div id="hospital-results-div" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Hospital cards will be rendered here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctor Search Section (Initially Hidden) -->
+        <section id="doctor-search-section" class="mb-16 hidden animate-fadeIn">
+            <h2 class="font-display text-3xl font-bold text-darkText mb-4 text-center animate-slideInRight">Doctors at <span id="selected-hospital-name" class="text-primaryBlue"></span></h2>
+
+            <div class="glass-card p-6 md:p-8 max-w-4xl mx-auto transform transition-all duration-300 hover:shadow-2xl">
+                <button id="back-to-hospitals-btn"
+                        class="mb-6 flex items-center gap-2 text-darkTextSecondary hover:text-primaryBlue transition-colors duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Hospitals
+                </button>
+
+                <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                    <div class="relative flex-1">
+                        <input type="text" id="doctor-search-input" placeholder="Search Doctors by name..."
+                               class="w-full p-3 pl-10 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                      focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-darkTextSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <div class="relative flex-1">
+                        <select id="doctor-specialty-filter"
+                                class="w-full p-3 pl-3 bg-slate-800 border border-darkBorder rounded-lg text-darkText placeholder-darkTextSecondary
+                                       appearance-none pr-8 focus:outline-none focus:ring-2 focus:ring-focusRing focus:border-transparent transition-all duration-200">
+                            <option value="">All Specialties</option>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-darkTextSecondary">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="doctor-results-div" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Doctor cards will be rendered here by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Sample Data
+        const sampleData = {
+            hospitals: [
+                { id: 1, name: 'Unity General Hospital', address: '123 Main St, Anytown', description: 'A leading hospital for general care, offering a wide range of medical services.', image: 'hospital-1.jpg' },
+                { id: 2, name: 'Evergreen Medical Center', address: '456 Oak Ave, Anytown', description: 'Specializing in emergency services and advanced surgical procedures.', image: 'hospital-2.jpg' },
+                { id: 3, name: 'Lakeside Community Health', address: '789 Pine Ln, Anytown', description: 'Focus on community wellness programs, preventive care, and family medicine.', image: 'hospital-3.jpg' },
+                { id: 4, name: 'St. Jude Children\'s Research Hospital', address: '262 Danny Thomas Pl, Memphis', description: 'Dedicated to treating and curing childhood diseases through innovative research.', image: 'hospital-4.jpg' },
+                { id: 5, name: 'Mayo Clinic', address: '200 1st St SW, Rochester', description: 'Renowned for integrated patient care, research, and education globally.', image: 'hospital-5.jpg' },
+                { id: 6, name: 'Cleveland Clinic', address: '9500 Euclid Ave, Cleveland', description: 'A multidisciplinary academic medical center providing world-class patient care.', image: 'hospital-6.jpg' },
+            ],
+            doctors: [
+                { id: 101, hospitalId: 1, name: 'Dr. Alice Smith', specialty: 'Cardiology', phone: '555-1234', email: 'alice.s@unity.com' },
+                { id: 102, hospitalId: 1, name: 'Dr. Bob Johnson', specialty: 'Pediatrics', phone: '555-5678', email: 'bob.j@unity.com' },
+                { id: 103, hospitalId: 2, name: 'Dr. Carol White', specialty: 'Emergency Medicine', phone: '555-9012', email: 'carol.w@evergreen.com' },
+                { id: 104, hospitalId: 3, name: 'Dr. David Green', specialty: 'Family Medicine', phone: '555-3456', email: 'david.g@lakeside.com' },
+                { id: 105, hospitalId: 1, name: 'Dr. Emily Brown', specialty: 'Dermatology', phone: '555-7890', email: 'emily.b@unity.com' },
+                { id: 106, hospitalId: 2, name: 'Dr. Frank Black', specialty: 'Orthopedics', phone: '555-2345', email: 'frank.b@evergreen.com' },
+                { id: 107, hospitalId: 4, name: 'Dr. Grace Hopper', specialty: 'Pediatric Oncology', phone: '555-8765', email: 'grace.h@stjude.com' },
+                { id: 108, hospitalId: 4, name: 'Dr. Alan Turing', specialty: 'Pediatric Neurology', phone: '555-4321', email: 'alan.t@stjude.com' },
+                { id: 109, hospitalId: 5, name: 'Dr. Ada Lovelace', specialty: 'Internal Medicine', phone: '555-9876', email: 'ada.l@mayo.com' },
+                { id: 110, hospitalId: 5, name: 'Dr. Charles Babbage', specialty: 'Cardiothoracic Surgery', phone: '555-6543', email: 'charles.b@mayo.com' },
+                { id: 111, hospitalId: 6, name: 'Dr. Marie Curie', specialty: 'Radiology', phone: '555-1122', email: 'marie.c@cleveland.com' },
+                { id: 112, hospitalId: 6, name: 'Dr. Albert Einstein', specialty: 'Neurology', phone: '555-3344', email: 'albert.e@cleveland.com' },
+            ]
+        };
+
+        // DOM Element References
+        const loginSection = document.getElementById('login-section');
+        const hospitalSearchSection = document.getElementById('hospital-search-section');
+        const doctorSearchSection = document.getElementById('doctor-search-section');
+
+        const patientLoginBtn = document.getElementById('patient-login-btn');
+        const doctorLoginBtn = document.getElementById('doctor-login-btn');
+        const patientLoginForm = document.getElementById('patient-login-form');
+        const doctorLoginForm = document.getElementById('doctor-login-form');
+
+        const hospitalSearchInput = document.getElementById('hospital-search-input');
+        const hospitalResultsDiv = document.getElementById('hospital-results-div');
+
+        const selectedHospitalNameSpan = document.getElementById('selected-hospital-name');
+        const doctorSearchInput = document.getElementById('doctor-search-input');
+        const doctorSpecialtyFilter = document.getElementById('doctor-specialty-filter');
+        const doctorResultsDiv = document.getElementById('doctor-results-div');
+        const backToHospitalsBtn = document.getElementById('back-to-hospitals-btn');
+
+        let currentLoginType = 'patient';
+        let selectedHospitalId = null;
+
+        // Login Toggle Logic
+        function setLoginType(type) {
+            currentLoginType = type;
+            if (type === 'patient') {
+                patientLoginBtn.classList.add('bg-gradient-to-r', 'from-primaryBlue', 'to-blue-500', 'text-white', 'shadow-md');
+                patientLoginBtn.classList.remove('text-darkTextSecondary', 'hover:bg-slate-700');
+                doctorLoginBtn.classList.remove('bg-gradient-to-r', 'from-primaryBlue', 'to-blue-500', 'text-white', 'shadow-md');
+                doctorLoginBtn.classList.add('text-darkTextSecondary', 'hover:bg-slate-700');
+                patientLoginForm.classList.remove('hidden');
+                doctorLoginForm.classList.add('hidden');
+                patientLoginForm.classList.add('animate-fadeIn');
+                doctorLoginForm.classList.remove('animate-fadeIn');
+            } else {
+                doctorLoginBtn.classList.add('bg-gradient-to-r', 'from-primaryBlue', 'to-blue-500', 'text-white', 'shadow-md');
+                doctorLoginBtn.classList.remove('text-darkTextSecondary', 'hover:bg-slate-700');
+                patientLoginBtn.classList.remove('bg-gradient-to-r', 'from-primaryBlue', 'to-blue-500', 'text-white', 'shadow-md');
+                patientLoginBtn.classList.add('text-darkTextSecondary', 'hover:bg-slate-700');
+                doctorLoginForm.classList.remove('hidden');
+                patientLoginForm.classList.add('hidden');
+                doctorLoginForm.classList.add('animate-fadeIn');
+                patientLoginForm.classList.remove('animate-fadeIn');
+            }
+        }
+
+        // Login Form Submission
+        patientLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.elements.email.value;
+            const password = e.target.elements.password.value;
+            alert(`Patient Login Attempt:\nEmail: ${email}\nPassword: ${password}\n(Authentication simulated)`);
+        });
+
+        doctorLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.elements.email.value;
+            const password = e.target.elements.password.value;
+            alert(`Doctor Login Attempt:\nID/Email: ${email}\nPassword: ${password}\n(Authentication simulated)`);
+        });
+
+        // Hospital Search & Display
+        function generateHospitalImagePlaceholder(hospitalId) {
+            const colors = ['#6366f1', '#ec4899', '#f97316', '#10b981', '#ef4444', '#0ea5e9']; // Dynamic colors
+            const color = colors[hospitalId % colors.length];
+            return `<div class="w-full h-32 rounded-t-lg bg-gradient-to-br from-${color}-500 to-${color}-700 flex items-center justify-center text-white text-lg font-bold" aria-hidden="true">
+                        <svg class="w-12 h-12 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>`;
+        }
+
+        function displayHospitals(hospitals) {
+            hospitalResultsDiv.innerHTML = '';
+            if (hospitals.length === 0) {
+                hospitalResultsDiv.innerHTML = `<p class="text-darkTextSecondary text-center col-span-full py-8">No hospitals found matching your search.</p>`;
+                return;
+            }
+            hospitals.forEach(hospital => {
+                const hospitalCard = document.createElement('div');
+                hospitalCard.classList.add('glass-card', 'p-0', 'overflow-hidden', 'cursor-pointer', 'transition-all', 'duration-300', 'transform', 'hover:scale-[1.02]', 'hover:shadow-2xl', 'animate-fadeIn');
+                hospitalCard.dataset.hospitalId = hospital.id;
+                hospitalCard.innerHTML = `
+                    ${generateHospitalImagePlaceholder(hospital.id)}
+                    <div class="p-5">
+                        <h3 class="font-display text-xl font-semibold text-darkText mb-2">${hospital.name}</h3>
+                        <p class="text-darkTextSecondary text-sm mb-3">${hospital.address}</p>
+                        <p class="text-darkTextSecondary text-sm leading-relaxed">${hospital.description}</p>
+                        <button class="mt-4 inline-flex items-center gap-2 text-primaryBlue hover:text-blue-400 font-medium transition-colors duration-200">
+                            View Doctors
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                `;
+                hospitalCard.addEventListener('click', () => showDoctorSearch(hospital));
+                hospitalResultsDiv.appendChild(hospitalCard);
+            });
+        }
+
+        hospitalSearchInput.addEventListener('input', () => {
+            const searchTerm = hospitalSearchInput.value.toLowerCase();
+            const filteredHospitals = sampleData.hospitals.filter(hospital =>
+                hospital.name.toLowerCase().includes(searchTerm) ||
+                hospital.address.toLowerCase().includes(searchTerm) ||
+                hospital.description.toLowerCase().includes(searchTerm)
+            );
+            displayHospitals(filteredHospitals);
+        });
+
+        // Doctor Search & Display
+        function populateSpecialtyFilter(hospitalId) {
+            doctorSpecialtyFilter.innerHTML = '<option value="">All Specialties</option>';
+            const doctorsInHospital = sampleData.doctors.filter(doc => doc.hospitalId === hospitalId);
+            const specialties = [...new Set(doctorsInHospital.map(doc => doc.specialty))].sort();
+            specialties.forEach(specialty => {
+                const option = document.createElement('option');
+                option.value = specialty;
+                option.textContent = specialty;
+                doctorSpecialtyFilter.appendChild(option);
+            });
+        }
+
+        function displayDoctors(doctors) {
+            doctorResultsDiv.innerHTML = '';
+            if (doctors.length === 0) {
+                doctorResultsDiv.innerHTML = `<p class="text-darkTextSecondary text-center col-span-full py-8">No doctors found matching your criteria.</p>`;
+                return;
+            }
+            doctors.forEach(doctor => {
+                const doctorCard = document.createElement('div');
+                doctorCard.classList.add('glass-card', 'p-5', 'transition-all', 'duration-200', 'transform', 'hover:scale-[1.02]', 'hover:shadow-xl', 'animate-fadeIn');
+                doctorCard.innerHTML = `
+                    <h3 class="font-display text-xl font-semibold text-primaryBlue mb-2">${doctor.name}</h3>
+                    <p class="text-darkTextSecondary text-sm mb-3">Specialty: <span class="text-darkText font-medium">${doctor.specialty}</span></p>
+                    <div class="flex items-center text-darkTextSecondary text-sm mb-1">
+                        <svg class="w-4 h-4 mr-2 text-accentGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684L10.5 9l2.5-2.5-2.5 2.5 1 4 4 1 2.5-2.5L21 15.28A1 1 0 0121 17v3a2 2 0 01-2 2h-3a2 2 0 01-2-2v-2a2 2 0 00-2-2H9a2 2 0 00-2 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-3.28a1 1 0 01.684-.948l4-1 2.5-2.5 2.5-2.5-4-1.28A1 1 0 013 12V9.72a2 2 0 012-2h3.28z"></path></svg>
+                        <a href="tel:${doctor.phone}" class="hover:underline">${doctor.phone}</a>
+                    </div>
+                    <div class="flex items-center text-darkTextSecondary text-sm">
+                        <svg class="w-4 h-4 mr-2 text-accentGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-2 10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12z"></path></svg>
+                        <a href="mailto:${doctor.email}" target="_blank" class="hover:underline">${doctor.email}</a>
+                    </div>
+                `;
+                doctorResultsDiv.appendChild(doctorCard);
+            });
+        }
+
+        function filterDoctors() {
+            const searchTerm = doctorSearchInput.value.toLowerCase();
+            const specialtyFilter = doctorSpecialtyFilter.value;
+            const doctorsInSelectedHospital = sampleData.doctors.filter(doc => doc.hospitalId === selectedHospitalId);
+
+            const filteredDoctors = doctorsInSelectedHospital.filter(doctor => {
+                const matchesSearch = doctor.name.toLowerCase().includes(searchTerm);
+                const matchesSpecialty = specialtyFilter === '' || doctor.specialty === specialtyFilter;
+                return matchesSearch && matchesSpecialty;
+            });
+            displayDoctors(filteredDoctors);
+        }
+
+        doctorSearchInput.addEventListener('input', filterDoctors);
+        doctorSpecialtyFilter.addEventListener('change', filterDoctors);
+
+        // Show Doctor Search Section
+        function showDoctorSearch(hospital) {
+            selectedHospitalId = hospital.id;
+            selectedHospitalNameSpan.textContent = hospital.name;
+
+            loginSection.classList.add('hidden');
+            hospitalSearchSection.classList.add('hidden');
+            doctorSearchSection.classList.remove('hidden');
+            doctorSearchSection.classList.add('animate-fadeIn');
+
+            // Clear previous doctor search/filter
+            doctorSearchInput.value = '';
+            doctorSpecialtyFilter.value = '';
+
+            populateSpecialtyFilter(hospital.id);
+            filterDoctors(); // Display all doctors for the selected hospital initially
+
+            // Scroll to the doctor search section smoothly
+            doctorSearchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Back to Hospitals Button
+        backToHospitalsBtn.addEventListener('click', () => {
+            selectedHospitalId = null;
+            doctorSearchSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            hospitalSearchSection.classList.remove('hidden');
+            loginSection.classList.add('animate-fadeIn');
+            hospitalSearchSection.classList.add('animate-fadeIn');
+
+            // Reset hospital search input and redisplay all hospitals
+            hospitalSearchInput.value = '';
+            displayHospitals(sampleData.hospitals);
+
+            // Scroll back to the hospital search section smoothly
+            hospitalSearchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // Initial Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            setLoginType('patient'); // Default to Patient Login
+            displayHospitals(sampleData.hospitals); // Display all hospitals initially
+        });
+
+        patientLoginBtn.addEventListener('click', () => setLoginType('patient'));
+        doctorLoginBtn.addEventListener('click', () => setLoginType('doctor'));
+    </script>
+</body>
+</html>
