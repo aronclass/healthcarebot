@@ -129,50 +129,134 @@
             
             <!-- DASHBOARD: Dynamically resizes based on max-width for desktop -->
             <section id="dashboard-view" class="visible-section space-y-8 h-full max-w-6xl mx-auto">
-                <div class="opal-card p-6 md:p-10 bg-gradient-to-br from-blue-50 to-white relative overflow-hidden flex flex-col md:flex-row items-center gap-8">
-                    <div class="flex-grow space-y-4 text-center md:text-left">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-2 text-gray-900">Welcome back, Alex</h2>
-                        <p class="text-gray-600 max-w-md">Your health journey is looking great. You have 1 pending invoice and 0 upcoming visits today.</p>
-                        <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-8">
-                            <button onclick="startChat('book')" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
-                                Book Appointment
+                <!-- Main Health Card -->
+                <div class="p-6 md:p-10 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-3xl relative overflow-hidden flex flex-col md:flex-row items-center gap-8 text-white shadow-lg">
+                    <div class="flex-grow space-y-4">
+                        <div class="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-bold">HEALTH SCORE: 95%</div>
+                        <h2 class="text-4xl md:text-5xl font-bold">Feeling good today?</h2>
+                        <p class="text-white/90 max-w-md text-sm">You've completed 80% of your daily health goals. Your next appointment is in 2 days.</p>
+                        <div class="flex flex-wrap gap-4 mt-8">
+                            <button onclick="startChat('book')" class="bg-white text-blue-600 px-8 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all hover:bg-blue-50">
+                                New Booking
                             </button>
-                            <button id="dash-pay-btn" onclick="toggleView('payment')" class="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all">
-                                <i class="fas fa-wallet mr-2"></i>Pay Bill
-                            </button>
-                            <button onclick="startChat('symptoms')" class="bg-white text-gray-700 px-8 py-3 rounded-2xl font-bold border border-gray-100 hover:bg-gray-50 transition-all">
+                            <button onclick="startChat('symptoms')" class="bg-white/20 backdrop-blur text-white px-8 py-3 rounded-2xl font-bold border border-white/30 hover:bg-white/30 transition-all">
                                 Check Symptoms
                             </button>
                         </div>
                     </div>
                     <!-- Decorative Element -->
-                    <div class="hidden lg:flex w-48 h-48 bg-blue-100/50 rounded-full items-center justify-center text-blue-600 text-6xl">
-                        <i class="fas fa-user-shield"></i>
+                    <div class="hidden lg:flex w-40 h-40 bg-white/10 rounded-full items-center justify-center text-white text-5xl">
+                        <i class="fas fa-heart"></i>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="opal-card p-6 bg-white border-l-4 border-blue-500 flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-bold text-xs text-gray-400 uppercase mb-2">Daily Tip</h4>
-                            <p id="ai-health-tip" class="text-gray-700 text-sm">Drink water before meals to improve digestion. 💧</p>
-                        </div>
-                        <div class="mt-4 text-[10px] text-gray-400 italic">Updated 2h ago</div>
-                    </div>
-                    <div class="opal-card p-6 bg-white border-l-4 border-emerald-500">
-                        <h4 class="font-bold text-xs text-gray-400 uppercase mb-2">Vitals</h4>
-                        <div class="flex items-center gap-4 mt-2">
-                            <div class="text-center">
-                                <p class="text-2xl font-bold text-gray-800">72</p>
-                                <p class="text-[10px] text-gray-400 font-bold">BPM</p>
+                <!-- Activity Progress Section -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 px-2">Activity Progress</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <!-- Steps -->
+                        <div class="text-center">
+                            <div class="relative w-24 h-24 mx-auto mb-3">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="226.19 301.59" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-gray-800">9.4k</span>
+                                </div>
                             </div>
-                            <div class="h-8 w-px bg-gray-100"></div>
-                            <div class="text-center">
-                                <p class="text-2xl font-bold text-gray-800">98.6</p>
-                                <p class="text-[10px] text-gray-400 font-bold">TEMP</p>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Steps</p>
+                        </div>
+                        <!-- Water -->
+                        <div class="text-center">
+                            <div class="relative w-24 h-24 mx-auto mb-3">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="151.06 301.59" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-gray-800">1.2L</span>
+                                </div>
+                            </div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Water</p>
+                        </div>
+                        <!-- Sleep -->
+                        <div class="text-center">
+                            <div class="relative w-24 h-24 mx-auto mb-3">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#fbbf24" stroke-width="8" stroke-dasharray="192.13 301.59" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-gray-800">7.2h</span>
+                                </div>
+                            </div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Sleep</p>
+                        </div>
+                        <!-- Kcal -->
+                        <div class="text-center">
+                            <div class="relative w-24 h-24 mx-auto mb-3">
+                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ef4444" stroke-width="8" stroke-dasharray="75.40 301.59" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold text-gray-800">520</span>
+                                </div>
+                            </div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Kcal</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meds and Assistant Cards -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Meds Card -->
+                    <div class="opal-card p-6 bg-white border-l-4 border-amber-400">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="font-bold text-xs text-gray-400 uppercase">Meds</h4>
+                            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Next: 2 PM</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center text-lg">💊</div>
+                            <div>
+                                <p class="font-bold text-gray-800 text-sm">Vitamin D3</p>
+                                <p class="text-xs text-gray-500">Capsules • Daily</p>
                             </div>
                         </div>
                     </div>
+
+                    <!-- AI Assistant Card -->
+                    <div class="opal-card p-6 bg-white border-l-4 border-blue-400">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+                                <i class="fas fa-brain text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-400 uppercase mb-2">AI Assistant</h4>
+                                <p class="text-gray-700 text-xs italic">"Your active recovery is looking good. Try to get 15 more minutes of movement today."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mindfulness Card -->
+                <div class="opal-card p-6 bg-white border-l-4 border-purple-400">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 flex-shrink-0">
+                            <i class="fas fa-spa text-sm"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-bold text-xs text-gray-400 uppercase mb-2">Mindfulness</h4>
+                            <p class="text-gray-700 text-sm font-medium mb-3">Daily Focus: Guided 5-min meditation</p>
+                            <button onclick="startChat('general')" class="text-xs font-bold text-purple-600 hover:text-purple-700">Start Session →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Message -->
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center">
+                    <p class="text-sm text-blue-700 font-medium">I can help you schedule an appointment. First, please choose a healthcare facility:</p>
                 </div>
             </section>
 
